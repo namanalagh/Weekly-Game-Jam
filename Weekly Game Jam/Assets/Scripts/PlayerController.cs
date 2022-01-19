@@ -15,18 +15,22 @@ public class PlayerController : MonoBehaviour
     public bool onGround;
     
     public LayerMask platformLayerMask;
-    
+
+    public Animator anim;
+
     private float speed;
     private float moveVertical;
     public float moveHorizontal;
     
     private Rigidbody2D rb;
     private CapsuleCollider2D capsuleCollider2D;
+    private SpriteRenderer sprite;
 
     void Start()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
         capsuleCollider2D = gameObject.GetComponent<CapsuleCollider2D>();
+        sprite = gameObject.GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -41,9 +45,26 @@ public class PlayerController : MonoBehaviour
             rb.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
 
         if (IsGrounded())
+        {
             speed = groundSpeed;
+            anim.SetBool("onGround", true);
+        }
         else
+        {
             speed = airSpeed;
+            anim.SetBool("onGround", false);
+        }
+
+        anim.SetFloat("Horizontal", Mathf.Abs(moveHorizontal));
+        anim.SetFloat("Vertical", rb.velocity.y);
+
+        if (moveHorizontal > 0)
+            sprite.flipX = false;
+        else if (moveHorizontal < 0)
+            sprite.flipX = true;
+
+        if (!IsGrounded())
+            anim.SetFloat("Horizontal", 0);
     }
 
     void FixedUpdate()
@@ -51,8 +72,6 @@ public class PlayerController : MonoBehaviour
         if (Mathf.Abs(moveHorizontal) > 0.1f && Mathf.Abs(rb.velocity.x) < maxVelocity && IsGrounded())
         {
             rb.AddForce(new Vector2(moveHorizontal * speed, 0f), ForceMode2D.Impulse);
-            //rb.MovePosition(transform.forward * speed);
-            //rb.velocity = new Vector2(speed * moveHorizontal, 0f);
         }
         else if (Mathf.Abs(moveHorizontal) > 0.1f && Mathf.Abs(rb.velocity.x) < maxAirVelocity)
         {
