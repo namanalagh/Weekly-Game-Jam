@@ -21,6 +21,8 @@ public class PlayerController : MonoBehaviour
     private float speed;
     private float moveVertical;
     public float moveHorizontal;
+    private float colliderYSize = .2f;
+    private float groundedSize;
     
     private Rigidbody2D rb;
     private CapsuleCollider2D capsuleCollider2D;
@@ -31,6 +33,7 @@ public class PlayerController : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody2D>();
         capsuleCollider2D = gameObject.GetComponent<CapsuleCollider2D>();
         sprite = gameObject.GetComponent<SpriteRenderer>();
+        groundedSize = capsuleCollider2D.size.y;
     }
 
     // Update is called once per frame
@@ -64,7 +67,14 @@ public class PlayerController : MonoBehaviour
             sprite.flipX = true;
 
         if (!IsGrounded())
+        {
             anim.SetFloat("Horizontal", 0);
+            capsuleCollider2D.size = new Vector2(capsuleCollider2D.size.x, colliderYSize);
+        }
+
+        else
+            capsuleCollider2D.size = new Vector2(capsuleCollider2D.size.x, groundedSize);
+
     }
 
     void FixedUpdate()
@@ -94,7 +104,8 @@ public class PlayerController : MonoBehaviour
 
     public bool IsGrounded()
     {
-        RaycastHit2D raycastHit2D = Physics2D.BoxCast(capsuleCollider2D.bounds.center, capsuleCollider2D.bounds.size, 0f, Vector2.down, .5f, platformLayerMask);
+        RaycastHit2D raycastHit2D = Physics2D.BoxCast(capsuleCollider2D.bounds.center, capsuleCollider2D.bounds.size * .5f, 0f, Vector2.down, 5f, platformLayerMask);
+        //RaycastHit2D raycastHit2D = Physics2D.Raycast(transform.position, Vector2.down * 5f, platformLayerMask);
         Debug.Log(raycastHit2D.collider);
         Debug.DrawRay(transform.position, Vector2.down*5f);
         onGround = raycastHit2D.collider;
